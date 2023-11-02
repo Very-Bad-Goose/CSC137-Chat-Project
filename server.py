@@ -1,7 +1,17 @@
-# Server
-
 import socket
 import select
+
+def get_local_ip():
+    # Get the local IP address of the server
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0.1)
+        # Doesn't have to be reachable
+        s.connect(("10.255.255.255", 1))
+        local_ip = s.getsockname()[0]
+    except Exception:
+        local_ip = "127.0.0.1"  # Fallback to localhost if unable to determine IP
+    return local_ip
 
 def receive_message(client_socket):
     try:
@@ -12,8 +22,8 @@ def receive_message(client_socket):
     except:
         return False
 
-# Prompt the user for server address and port
-server_ip = input("Enter the server IP address: ")
+# Get the local server IP address
+server_ip = get_local_ip()
 server_port = int(input("Enter the server port: "))
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
