@@ -22,6 +22,15 @@ def receive_message(client_socket):
     except:
         return False
 
+def send_direct_message(sender_socket, recipient_username, message):
+    # Find the recipient's socket based on their username
+    for client_socket, username in clients.items():
+        if username == recipient_username:
+            try:
+                client_socket.send(f"Direct message from {sender_username}: {message}".encode())
+            except:
+                continue
+
 # Get the local server IP address
 server_ip = get_local_ip()
 server_port = int(input("Enter the server port: "))
@@ -35,7 +44,7 @@ server_socket.bind(server_address)
 server_socket.listen(5)
 
 sockets_list = [server_socket]
-clients = {}
+clients = {}  # Dictionary to map sockets to usernames
 
 print("Server is running on {}:{}".format(server_ip, server_port))
 
@@ -43,22 +52,38 @@ while True:
     read_sockets, _, _ = select.select(sockets_list, [], [])
     for notified_socket in read_sockets:
         if notified_socket == server_socket:
-            client_socket, client_address = server_socket.accept()
+            client_socket, _ = server_socket.accept()
             user = receive_message(client_socket)
             if user is False:
                 continue
             sockets_list.append(client_socket)
             clients[client_socket] = user
-            print("Accepted connection from {}:{}".format(client_address[0], client_address[1]))
+            print(f"Accepted connection from {user}")
         else:
             message = receive_message(notified_socket)
             if message is False:
-                print("Closed connection from {}".format(clients[notified_socket]))
+                sender_username = clients[notified_socket]
+                print(f"Closed connection from {sender_username}")
                 sockets_list.remove(notified_socket)
                 del clients[notified_socket]
                 continue
-            user = clients[notified_socket]
-            print(f"Received message from {user}: {message}")
+
+            sender_username = clients[notified_socket]
+
+            # Check if the message is a direct message
+            if message.startswith("/msg "):
+                parts = message.split(" ", 2)
+                if len(parts) == 3:
+                    recipient_username = parts[1]
+                    direct_message = parts[2]
+                    send_direct_message(notified_socket, recipient_username, direct_message)
+            else:
+                print(f"Received message from {sender_username}: {message}")
+
+            # Broadcast the message to all users (including the sender)
             for client_socket in clients:
                 if client_socket != notified_socket:
-                    client_socket.send(f"{user}: {message}".encode())
+                    try:
+                        client_socket.send(f"{sender_username}: {message}".encode())
+                    except:
+                        continue
