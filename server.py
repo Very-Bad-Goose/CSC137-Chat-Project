@@ -4,16 +4,15 @@ import select
 def get_local_ip():
     # Get the local IP address of the server
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) # Using UDP
         s.settimeout(0.1)
-        # Doesn't have to be reachable
         s.connect(("10.255.255.255", 1))
         local_ip = s.getsockname()[0]
     except Exception:
-        local_ip = "127.0.0.1"  # Fallback to localhost if unable to determine IP
+        local_ip = "127.0.0.1"  # Default to localhost if unable to determine IP
     return local_ip
 
-def receive_message(client_socket):
+def receive_message(client_socket): # Function helper for Direct messaging
     try:
         message = client_socket.recv(1024).decode()
         if not message:
@@ -23,7 +22,7 @@ def receive_message(client_socket):
         return False
 
 def send_direct_message(sender_socket, recipient_username, message):
-    # Find the recipient's socket based on their username
+    # Find recipient's socket based on their username
     for client_socket, username in clients.items():
         if username == recipient_username:
             try:
@@ -44,8 +43,9 @@ server_socket.bind(server_address)
 server_socket.listen(5)
 
 sockets_list = [server_socket]
-clients = {}  # Dictionary to map sockets to usernames
+clients = {}  # Used to map sockets to usernames
 
+# Server welcome message on startup with the IP its running on
 print("Server is running on {}:{}".format(server_ip, server_port))
 
 while True:
@@ -78,9 +78,9 @@ while True:
                     direct_message = parts[2]
                     send_direct_message(notified_socket, recipient_username, direct_message)
             else:
-                print(f"Received message from {sender_username}: {message}")
+                print(f"Direct message from {sender_username}: {message}")
 
-            # Broadcast the message to all users (including the sender)
+            # Message all in chatroom
             for client_socket in clients:
                 if client_socket != notified_socket:
                     try:
