@@ -71,7 +71,7 @@ while True:
             sender_username = clients[notified_socket]
 
             # Check if the message is a direct message
-            if message.startswith("/msg "):
+            if message.startswith("MSEG "):
                 parts = message.split(" ", 2)
                 if len(parts) == 3:
                     recipient_username = parts[1]
