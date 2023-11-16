@@ -1,5 +1,6 @@
 import socket
 import select
+import sys
 
 def get_local_ip():
     # Get the local IP address of the server
@@ -30,9 +31,19 @@ def send_direct_message(sender_socket, recipient_username, message):
             except:
                 continue
 
+
+if len(sys.argv) != 2:
+    print("No port supplied | Usage python3 server.py *port number*")
+    exit()
+if (sys.argv[1].isnumeric() == False):
+    print("port must be a valid number")
+    exit()
+
+inputPort = sys.argv[1]
+
 # Get the local server IP address
 server_ip = get_local_ip()
-server_port = int(input("Enter the server port: "))
+server_port = int(inputPort)
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -68,6 +79,8 @@ while True:
                 del clients[notified_socket]
                 continue
 
+            #set commandisIssuedFlag back to 0 so others see messages
+            commandisIssuedFlag = 0
             sender_username = clients[notified_socket]
 
             # Check if the message is a direct message
@@ -77,12 +90,23 @@ while True:
                     recipient_username = parts[1]
                     direct_message = parts[2]
                     send_direct_message(notified_socket, recipient_username, direct_message)
+
+                    commandisIssuedFlag = 1
             else:
                 print(f"Direct message from {sender_username}: {message}")
 
-            # Message all in chatroom
+            # list out users to the requestor
+            if message.startswith("LIST"):
+                    commandisIssuedFlag = 1
+                    connected_users = "\n ".join(clients.values())
+                    try:
+                        notified_socket.send(f"Connected users:\n {connected_users}".encode())
+                    except:
+                        continue
+
+            # Message all in chatroom NOTE: commandisIssuedFlag = 0 means user did not type any "command" for the first arg
             for client_socket in clients:
-                if client_socket != notified_socket:
+                if client_socket != notified_socket and commandisIssuedFlag == 0:
                     try:
                         client_socket.send(f"{sender_username}: {message}".encode())
                     except:
