@@ -25,24 +25,24 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 if len(sys.argv) != 3:
     print("Invalid number of arguments supplied")
     exit(1)
-#check to make sure second argument (port) doesn't contain characters and is within usable range
+# check to make sure second argument (port) doesn't contain characters and is within usable range
 if sys.argv[2].isnumeric() == False or int(sys.argv[2]) < 0 or int(sys.argv[2]) > 65535:
     print("invalid argument supplied: port must be numbers within the range 0-65535")
     exit(1)
 
-#Output "JOIN" instructions and error check client
+# Output "JOIN" instructions and error check client
 while True:
-    firstCmd = input("Enter JOIN followed by your username:")
+    firstCmd = input("Enter JOIN followed by your username: ")
     words = firstCmd.split()
     parsed_words = [word.lower() for word in words]
-    #only break out of the condition checking if 2 args supplied and "join" is the first
+    # only break out of the condition checking if 2 args supplied and "join" is the first
     if (parsed_words[0] == "join") and (parsed_words[1]):
-        break;
+        break
 
 
 # Take server IP and port from args
-server_ip = sys.argv[1]        #input("Enter the server IP address: ")
-server_port = int(sys.argv[2])      #int(input("Enter the server port: "))
+server_ip = sys.argv[1]        # input("Enter the server IP address: ")
+server_port = int(sys.argv[2])      # int(input("Enter the server port: "))
 
 server_address = (server_ip, server_port)
 client_socket.connect(server_address)
