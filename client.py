@@ -1,5 +1,5 @@
 # Client
-
+import os
 import socket
 import sys
 import threading
@@ -8,6 +8,12 @@ def send_message(client_socket):
     while True:
         message = input()
         client_socket.send(message.encode())
+
+        #exit back to command line if quit is issued
+        if (message == "quit" or message == "QUIT"):
+            print(f"{user} is quitting the chat server")
+            os._exit(1)
+
 
 def receive_messages(client_socket):
     while True:

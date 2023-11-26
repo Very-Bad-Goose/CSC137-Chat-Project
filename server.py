@@ -59,6 +59,7 @@ clients = {}  # Used to map sockets to usernames
 # Server welcome message on startup with the IP its running on
 print("Server is running on {}:{}".format(server_ip, server_port))
 
+#accept user connections
 while True:
     read_sockets, _, _ = select.select(sockets_list, [], [])
     for notified_socket in read_sockets:
@@ -69,14 +70,31 @@ while True:
                 continue
             sockets_list.append(client_socket)
             clients[client_socket] = user
-            print(f"Accepted connection from {user}")
+
+            #print server side connection tuple for socket that joined
+            print(f"Connected with {user}, {client_socket.getsockname()}")
+
+            #notify everyone when someone joins
+            for client_socket in clients:
+                try:
+                    client_socket.send(f"{user} joined!".encode())
+                except:
+                    continue
+
+
         else:
             message = receive_message(notified_socket)
-            if message is False or message == "QUIT":
+            #if quit is entered as a command, close the connection and notify
+            if message is False or message.lower() == "quit":
                 sender_username = clients[notified_socket]
                 print(f"Closed connection from {sender_username}")
                 sockets_list.remove(notified_socket)
                 del clients[notified_socket]
+                for client_socket in clients:
+                    try:
+                        client_socket.send(f"{sender_username} left".encode())
+                    except:
+                        continue
                 continue
 
             # set commandisIssuedFlag back to 0 so others see messages
