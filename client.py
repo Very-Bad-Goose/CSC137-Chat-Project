@@ -29,7 +29,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
 if len(sys.argv) != 3:
-    print("Invalid number of arguments supplied")
+    print("Invalid number of arguments supplied | Usage python3 client.py <svr_ip> <svr_port>")
     exit(1)
 # check to make sure second argument (port) doesn't contain characters and is within usable range
 if sys.argv[2].isnumeric() == False or int(sys.argv[2]) < 0 or int(sys.argv[2]) > 65535:

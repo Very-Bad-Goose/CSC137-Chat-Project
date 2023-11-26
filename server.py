@@ -59,7 +59,7 @@ clients = {}  # Used to map sockets to usernames
 # Server welcome message on startup with the IP its running on
 print("Server is running on {}:{}".format(server_ip, server_port))
 
-#accept user connections
+# accept user connections
 while True:
     read_sockets, _, _ = select.select(sockets_list, [], [])
     for notified_socket in read_sockets:
@@ -71,10 +71,10 @@ while True:
             sockets_list.append(client_socket)
             clients[client_socket] = user
 
-            #print server side connection tuple for socket that joined
+            # print server side connection tuple for socket that joined
             print(f"Connected with {user}, {client_socket.getsockname()}")
 
-            #notify everyone when someone joins
+            # notify everyone when someone joins
             for client_socket in clients:
                 try:
                     client_socket.send(f"{user} joined!".encode())
@@ -84,7 +84,7 @@ while True:
 
         else:
             message = receive_message(notified_socket)
-            #if quit is entered as a command, close the connection and notify
+            # if quit is entered as a command, close the connection and notify
             if message is False or message.lower() == "quit":
                 sender_username = clients[notified_socket]
                 print(f"Closed connection from {sender_username}")
@@ -108,7 +108,7 @@ while True:
                     recipient_username = parts[1].lower()
                     direct_message = parts[2]
                     send_direct_message(notified_socket, recipient_username, direct_message)
-                    print(f"Direct message from {sender_username}: {direct_message}")
+                    print(f"Direct message from {sender_username} to {recipient_username} containing: {direct_message}")
                     commandisIssuedFlag = 1
 
             # list out users to the requestor
@@ -120,7 +120,8 @@ while True:
                 except:
                     continue
 
-            # Message all in chatroom NOTE: commandisIssuedFlag = 0 means user did not type any "command" for the first arg
+            # Message all in chatroom
+            # NOTE: commandisIssuedFlag = 0 means user did not type any "command" for the first arg
             # Message all in chatroom using broadcast
             if message.startswith("BCST "):
                 commandisIssuedFlag = 1
